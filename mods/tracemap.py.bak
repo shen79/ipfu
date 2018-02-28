@@ -1,0 +1,74 @@
+#!/usr/bin/python
+
+import logging, time, os, sys, inspect, socket, nfqueue, ipcalc, struct
+sys.path.append("./libs")
+from mixins import *
+import pprint
+
+logging.getLogger("scapy.runtime").setLevel(logging.ERROR)	# prevent scapy warnings for ipv6
+from scapy import all as scapy
+from netaddr import IPAddress
+scapy.conf.verb = 0
+
+# udpholepunch
+class tracemap(loggerMixin):
+	def __init__(self, params):
+		if len(params) != 2:
+			self.usage()
+			exit(1)
+		self.target = params[0]
+		self.proto = params[1]
+		if self.proto in ["tcp", "udp"]:
+			self.port = params[2]
+		elif self.proto == "icmp":
+			pass
+
+	def usage(self):
+		print "Usage:"
+		print "\t%s tracemap <target> <proto:icmp|tcp|udp> [port]" % sys.argv[0]
+
+	def start(self):
+		self.tracemap()
+	
+	def tracemap(self):
+		# punchpkt
+		self.msg("tracemapping...")
+		res = {}
+		lasthop=24
+		for ttl in range(0,lasthop+1)[::-1]:
+			self.msg("ttl = %d" % ttl)
+			pkt = scapy.IP(dst=self.target, ttl=ttl, id=ttl)
+			if self.proto in ["tcp", "udp"]:
+				pkt/= scapy.UDP(sport=12345, dport=self.port)
+			elif self.proto == "icmp":
+				pkt/= scapy.ICMP()
+			res[ttl] = scapy.sr(pkt, timeout=1)
+		print res
+		trace = {}
+		for ttl in range(0,lasthop+1):
+			print "ttl: " +  str(ttl), res[ttl][0]
+			for response in res[ttl][0]:
+				if response[1].sprintf("%IP.proto%") == "icmp":
+					tc = response[1].sprintf("%ICMP.type%:%ICMP.code%")
+					if tc == "time-exceeded:ttl-zero-during-transit":
+						srcip = response[1].sprintf("%IP.src%")
+						dstip = response[1].sprintf("%ICMP.dst%")
+						if dstip not in trace:
+							trace[dstip] = {}
+						trace[dstip][ttl] = srcip
+					else:
+						response[1].show()
+				elif response[1].sprintf("%IP.proto%") == "tcp":
+					pass
+				elif response[1].sprintf("%IP.proto%") == "udp":
+					pass
+		pprint.pprint(trace)
+					
+		
+
+
+
+
+
+#	print "%s %s/%s" %( p[1].sprintf("%IP.src%"), p[1].sprintf("%ICMP.type%"), p[1].sprintf("%ICMP.code%") )
+
