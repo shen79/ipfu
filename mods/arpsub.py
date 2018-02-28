@@ -1,7 +1,6 @@
 #!/usr/bin/python
 
 import logging
-#, time, os, sys, inspect, socket, nfqueue, ipcalc, struct
 from IPFU import *
 logging.getLogger("scapy.runtime").setLevel(logging.ERROR)	# prevent scapy warnings for ipv6
 from scapy import all as scapy
@@ -27,6 +26,7 @@ class arpsub(IPFU):
 				self.mynet = params[2]
 			except:
 				self.mynet = self.getMyNet(self.iface)
+				self.msg('local network not specified, using ' + self.mynet)
 		except:
 			print self.__doc__
 			if params is not None: exit(1)
@@ -34,14 +34,12 @@ class arpsub(IPFU):
 	def start(self):
 		lt = self.getmacs(self.mynet)
 		pkt = scapy.Ether(dst="ff:ff:ff:ff:ff:ff")
-#		pkt/= scapy.ARP(op=scapy.ARP.who_has, psrc=self.myip, pdst=self.subnet)
 		pkt/= scapy.ARP(op=scapy.ARP.who_has, pdst=self.subnet)
 		self.msg("Scanning...")
 		a,u = scapy.srp(pkt, timeout=2, iface=self.iface)
 		self.msg("Finished")
-		self.msg("       %-17s %-16s %s" % ('MAC address', 'local IP', 'extra IP'))
+		self.msg("       %-17s %-16s %s" % ('MAC address', 'local iface', 'another iface'))
 		for p in a:
-#			p[1].show()
 			a_mac = p[1].sprintf("%ARP.hwsrc%")
 			a_ip = p[1].sprintf("%ARP.psrc%")
 			try:

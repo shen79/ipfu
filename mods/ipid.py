@@ -1,22 +1,21 @@
 #!/usr/bin/python
 
-import logging, time, os, sys, inspect, socket, nfqueue, ipcalc, struct
+import logging, sys
 from IPFU import *
-
-logging.getLogger("scapy.runtime").setLevel(logging.ERROR)	# prevent scapy warnings for ipv6
 from scapy import all as scapy
 from netaddr import IPAddress
 
+logging.getLogger("scapy.runtime").setLevel(logging.ERROR)	# prevent scapy warnings for ipv6
 scapy.conf.verb = 0
 
 
-class lvsdetect(IPFU):
-	"""lvsdetect
-	ipfu lvsdetect <IP> <tcpport> <packets#> <tolerance>
+class ipid(IPFU):
+	"""ipid - IP.ID field measuring tool
+	ipfu lvsdetect <IP> <tcpport> <packets> <tolerance>
 	"""
+	# https://tools.ietf.org/html/rfc6864
 	def __init__(self, params=None):
 		try:
-			self.do_icmp = False
 			self.dst = params[0]
 			self.dport = int(params[1])
 			self.mpackets = int(params[2])
@@ -27,10 +26,16 @@ class lvsdetect(IPFU):
 			if params is not None: exit(1)
 
 	def start(self):
-		pkts = self.m1(self.dst, self.dport)
+		pkts = self.send(self.dst, self.dport)
 		ipids = []
+		allnull = True
 		for p in pkts:
 			ipids.append(p[1].id)
+			if p[1].id > 0:
+				allnull = False
+		if allnull:
+			self.msg('all IP.ID was 0...')
+			sys.exit(0)
 		ipids.sort()
 		self.msg("IPIDS: %s" % ipids)
 		pits = 1
@@ -60,7 +65,7 @@ class lvsdetect(IPFU):
 					
 			
 
-	def m1(self, dst, dport):
+	def send(self, dst, dport):
 		pkt = scapy.IP(dst=dst)
 		pkt/= scapy.TCP(sport=self.sport, dport=dport, flags="S", window=8192,
 				options=[
@@ -71,7 +76,12 @@ class lvsdetect(IPFU):
 					('NOP', None),
 					('SAckOK', '')
 				])
+		self.msg("sending out %d SYN packets" % self.mpackets)
 		a,u = scapy.sr(pkt * self.mpackets, timeout=2)
+		self.msg("finished...")
 		if a is not None:
 			return a
+		else:
+			self.msg("uh... we did not recvd any response...")
+			sys.exit(1)
 

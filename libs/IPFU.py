@@ -2,7 +2,8 @@
 
 import logging, time, os, sys, inspect, socket, nfqueue, ipcalc, struct
 import importlib, scandir
-from netaddr import IPAddress
+#from netaddr import IPAddress
+import netaddr
 import netifaces
 sys.path.append("./mods")
 logging.getLogger("scapy.runtime").setLevel(logging.ERROR)	# prevent scapy warnings for ipv6
@@ -30,7 +31,11 @@ class IPFU:
 		return netifaces.ifaddresses(iface)[netifaces.AF_INET][0]['addr']
 
 	def getMyNet(self, iface):
-		return self.getMyIP(iface) + '/' + str(IPAddress(netifaces.ifaddresses(iface)[netifaces.AF_INET][0]['netmask']).netmask_bits())
+		ip = self.getMyIP(iface)
+		bits = str(netaddr.IPAddress(netifaces.ifaddresses(iface)[netifaces.AF_INET][0]['netmask']).netmask_bits())
+		net = netaddr.IPNetwork(ip+'/'+bits)
+		ret = str(net.network) + '/' + bits
+		return ret
 
 	def getmacs(self, target):
 		ret = {'ip_mac': {}, 'mac_ip': {}}
