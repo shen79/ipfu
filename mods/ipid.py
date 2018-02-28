@@ -34,10 +34,10 @@ class ipid(IPFU):
 			if p[1].id > 0:
 				allnull = False
 		if allnull:
-			self.msg('all IP.ID was 0...')
+			self.msg('all IP.IDs were 0...')
 			sys.exit(0)
 		ipids.sort()
-		self.msg("IPIDS: %s" % ipids)
+		self.msg("we received the following IP.IDs: %s" % ipids)
 		pits = 1
 		prev = -1
 		groups = {}

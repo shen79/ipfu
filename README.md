@@ -8,7 +8,7 @@ Kinda modular, at the moment we have the following modules:
 - tracemap - broken/unfinished
 - flagfuzzer - TCP flag fuzzing for firewall auditing and messing with the netstack
 - udpholepunch - broken/unfinished
-- lvsdetect - LVS/IP.id measuring
+- ipid - IP.id measuring
 - rr - IP Options Record Route feature - like traceroute but -forexample- leaks internal IP addresses, etc. - see below
 - tsfu - IP Options timestamp feature to map remote (internal) networks
 - synfinfu - iptables firewall "--syn" bypass (Only match TCP packets with the SYN bit set and the ACK,RST and FIN bits cleared.)
