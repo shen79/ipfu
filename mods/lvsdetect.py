@@ -1,8 +1,7 @@
 #!/usr/bin/python
 
 import logging, time, os, sys, inspect, socket, nfqueue, ipcalc, struct
-sys.path.append("./libs")
-from mixins import *
+from IPFU import *
 
 logging.getLogger("scapy.runtime").setLevel(logging.ERROR)	# prevent scapy warnings for ipv6
 from scapy import all as scapy
@@ -11,20 +10,21 @@ from netaddr import IPAddress
 scapy.conf.verb = 0
 
 
-class lvsdetect(loggerMixin):
-	def __init__(self, params):
-		if len(params) != 4:
-			self.usage()
-			exit(1)
-		self.do_icmp = False
-		self.dst = params[0]
-		self.dport = int(params[1])
-		self.mpackets = int(params[2])
-		self.tolerance = int(params[3])
-		self.sport = scapy.RandNum(1024,65535)
-
-	def usage(self):
-		print "Usage: %s ip.lvsdetect <IP> <tcpport> <packets#> <tolerance>" % sys.argv[0]
+class lvsdetect(IPFU):
+	"""lvsdetect
+	ipfu lvsdetect <IP> <tcpport> <packets#> <tolerance>
+	"""
+	def __init__(self, params=None):
+		try:
+			self.do_icmp = False
+			self.dst = params[0]
+			self.dport = int(params[1])
+			self.mpackets = int(params[2])
+			self.tolerance = int(params[3])
+			self.sport = scapy.RandNum(1024,65535)
+		except:
+			print self.__doc__
+			if params is not None: exit(1)
 
 	def start(self):
 		pkts = self.m1(self.dst, self.dport)

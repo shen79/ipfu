@@ -1,31 +1,29 @@
 #!/usr/bin/python
 
 import logging, time, os, sys, inspect, socket, nfqueue, ipcalc, struct
-sys.path.append("./libs")
-from mixins import *
+from IPFU import *
 import pprint
-
-logging.getLogger("scapy.runtime").setLevel(logging.ERROR)	# prevent scapy warnings for ipv6
 from scapy import all as scapy
 from netaddr import IPAddress
+logging.getLogger("scapy.runtime").setLevel(logging.ERROR)	# prevent scapy warnings for ipv6
 scapy.conf.verb = 0
 
 # udpholepunch
-class tracemap(loggerMixin):
-	def __init__(self, params):
-		if len(params) != 2:
-			self.usage()
-			exit(1)
-		self.target = params[0]
-		self.proto = params[1]
-		if self.proto in ["tcp", "udp"]:
-			self.port = params[2]
-		elif self.proto == "icmp":
-			pass
-
-	def usage(self):
-		print "Usage:"
-		print "\t%s tracemap <target> <proto:icmp|tcp|udp> [port]" % sys.argv[0]
+class tracemap(IPFU):
+	"""tracemap - traceroute to map
+	ipfu tracemap <target> <proto:icmp|tcp|udp> [port]
+	"""
+	def __init__(self, params=None):
+		try:
+			self.target = params[0]
+			self.proto = params[1]
+			if self.proto in ["tcp", "udp"]:
+				self.port = params[2]
+			elif self.proto == "icmp":
+				pass
+		except:
+			print self.__doc__
+			if params is not None: exit(1)
 
 	def start(self):
 		self.tracemap()

@@ -2,8 +2,7 @@
 
 import logging, time, os, sys, inspect, socket, nfqueue, ipcalc, struct
 logging.getLogger("scapy.runtime").setLevel(logging.ERROR)	# prevent scapy warnings for ipv6
-sys.path.append("./libs")
-from mixins import *
+from IPFU import *
 
 from scapy import all as scapy
 from netaddr import IPAddress
@@ -12,21 +11,20 @@ scapy.conf.verb = 0
 
 
 # gwscan module
-class gwscan(GetMacsMixin, loggerMixin):
-	def __init__(self, params):
-		if len(params) != 2:
-			self.usage()
-			exit(1)
-
-		self.net = params[0]
-		self.ip = params[1]
-
-	def usage(self):
-		print "Usage:"
-		print "\t%s ether.gwscan <local_subnet> <target_ip/net>" % sys.argv[0]
-		print "examples:"
-		print "\t%s gwscan 192.168.1.0/24 8.8.8.8" % sys.argv[0]
-		print "\t%s gwscan 192.168.1.0/24 10.0.0.0/24" % sys.argv[0]
+class gwscan(IPFU):
+	"""gwscan
+	ipfu gwscan <local_subnet> <target_ip/net>
+	examples:
+		ipfu gwscan 192.168.1.0/24 8.8.8.8
+		ipfu gwscan 192.168.1.0/24 10.0.0.0/24
+	"""
+	def __init__(self, params=None):
+		try:
+			self.net = params[0]
+			self.ip = params[1]
+		except:
+			print self.__doc__
+			if params is not None: exit()
 
 	def start(self):
 		ret = self.gwscan_icmp(self.net, self.ip)

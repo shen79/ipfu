@@ -1,8 +1,7 @@
 #!/usr/bin/python
 
 import logging, time, os, sys, inspect, socket, nfqueue, ipcalc, struct
-sys.path.append("./libs")
-from mixins import *
+from IPFU import *
 logging.getLogger("scapy.runtime").setLevel(logging.ERROR)	# prevent scapy warnings for ipv6
 from scapy import all as scapy
 from netaddr import IPAddress
@@ -11,17 +10,24 @@ scapy.conf.verb = 0
 
 
 # flagfuzzer
-class flagfuzzer(loggerMixin):
-	def __init__(self, params):
-		if len(params) != 2:
-			self.usage()
-			exit(1)
-		self.dst = params[0]
-		self.port = int(params[1])
-
-	def usage(self):
-		print "Usage:"
-		print "\t%s tcp.flagfuzzer <target_ip> <port>" % sys.argv[0]
+class flagfuzzer(IPFU):
+	"""flagfuzzer - TCP flag fuzzer
+	ipfu flagfuzzer <tarrget_ip> <port> [full]
+		by default it's playing around with FIN, SYN, ACK and RST flags (+2: SYN+URG, SYN+ECN)
+	"""
+	def __init__(self, params=None):
+		try:
+			self.dst = params[0]
+			self.port = int(params[1])
+			try:
+				self.f = params[2]
+				if self.f == 'full':
+					self.scanflags = range(0,63)
+			except:
+				self.scanflags = ['','F','S','A','R','FS','FA','FR','SA','SR','AR','FSA','FSR','ARS', 'SU','SE']
+		except:
+			print self.__doc__
+			if params is not None: exit(1)
 
 	def start(self):
 		self.flagfuzzer(self.dst, self.port)
@@ -32,11 +38,9 @@ class flagfuzzer(loggerMixin):
 			'RA':[],	# RST-ACK
 			'SA':[],	# SYN-ACK
 			'--':[],	# no response
-			'??':[]		# ICMP error msgs (?)
+			'??':[]		# ICMP error msgs (maybe... inspect this manually)
 		}
-		scanflags = ['','F','S','FS','R','RF','RS','RSF','A','AF','AS','ASF','AR','ARF','ARS','ARSF']
-#		scanflags = range(0,21)
-		for flagval in scanflags:
+		for flagval in self.scanflags:
 			pkt = scapy.IP(dst=dst)
 			pkt/= scapy.TCP(dport=port, sport=scapy.RandNum(1024,65535), flags=flagval)
 			x = scapy.sr1( pkt, timeout=.5)
@@ -52,6 +56,7 @@ class flagfuzzer(loggerMixin):
 				r['--'].append(sent)
 		self.msg("finished")
 		del r['--']
+		self.msg("%4s: %s" % ('Recv', 'Sent'))
 		for k in r.keys():
 			self.msg("%4s: %s" % (k, " ".join(r[k])))
 

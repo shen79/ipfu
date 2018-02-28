@@ -1,8 +1,7 @@
 #!/usr/bin/python
 
 import logging, time, os, sys, inspect, socket, nfqueue, ipcalc, struct
-sys.path.append("./libs")
-from mixins import *
+from IPFU import *
 
 logging.getLogger("scapy.runtime").setLevel(logging.ERROR)	# prevent scapy warnings for ipv6
 from scapy import all as scapy
@@ -11,19 +10,19 @@ from netaddr import IPAddress
 scapy.conf.verb = 0
 
 
-class tsfu:
-	def __init__(self, params):
-		if len(params) != 4:
-			self.usage()
-			exit(1)
-		self.prev_ip = params[0]
-		self.target_ip = params[1]
-		self.port = int(params[2])
-		self.net = params[3]
-
-	def usage(self):
-		print "Usage:"
-		print "\t%s ip.tsfu <previous_ip> <target_ip> <port> <net>" % sys.argv[0]
+class tsfu(IPFU):
+	"""tsfu - TimeStamp-FU - exploiting the IP Options timestamp feature to leak intranet/network IPs and ranges
+	ipfu tsfu <previous_ip> <target_ip> <port> <net>
+	"""
+	def __init__(self, params=None):
+		try:
+			self.prev_ip = params[0]
+			self.target_ip = params[1]
+			self.port = int(params[2])
+			self.net = params[3]
+		except:
+			print self.__doc__
+			if params is not None: exit(1)
 
 	def start(self):
 		self.tsfu(self.prev_ip, self.target_ip, self.port, self.net)

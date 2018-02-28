@@ -1,36 +1,33 @@
 #!/usr/bin/python
 
 import logging, time, os, sys, inspect, socket, nfqueue, ipcalc, struct
-sys.path.append("./libs")
-from mixins import *
-
-logging.getLogger("scapy.runtime").setLevel(logging.ERROR)	# prevent scapy warnings for ipv6
+from IPFU import *
 from scapy import all as scapy
 from netaddr import IPAddress
 
+logging.getLogger("scapy.runtime").setLevel(logging.ERROR)	# prevent scapy warnings for ipv6
 scapy.conf.verb = 0
 
 
 
 # rr module
-class rr(loggerMixin):
-	def __init__(self, params):
+class rr(IPFU):
+	"""rr - Record Route IP options feature
+	ipfu rr [-i] <IP> <tcpport>
+		-i do ICMP RR"
+	"""
+	def __init__(self, params=None):
 		self.do_icmp = False
-
-		textparams = filter(lambda x: x != "-i", params)
-		if len(textparams) < 2:
-			self.usage()
-			exit(1)
-
-		if "-i" in params:
-			self.do_icmp=True
-
-		self.dst = textparams[0]
-		self.dport = textparams[1]
-
-	def usage(self):
-		print "Usage: %s ip.rr [-i] <IP> <tcpport>" % sys.argv[0]
-		print "\t -i\tdo ICMP RR"
+		try:
+			textparams = filter(lambda x: x != "-i", params)
+			if "-i" in params:
+				self.do_icmp=True
+	
+			self.dst = textparams[0]
+			self.dport = textparams[1]
+		except:		
+			print self.__doc__
+			if params is not None: exit(1)
 
 	def start(self):
 		if self.do_icmp == 1:

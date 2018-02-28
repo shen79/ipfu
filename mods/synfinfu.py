@@ -1,8 +1,7 @@
 #!/usr/bin/python
 
 import logging, time, os, sys, inspect, socket, nfqueue, ipcalc, struct
-sys.path.append("./libs")
-from mixins import *
+from IPFU import *
 
 logging.getLogger("scapy.runtime").setLevel(logging.ERROR)	# prevent scapy warnings for ipv6
 from scapy import all as scapy
@@ -10,17 +9,17 @@ from netaddr import IPAddress
 
 scapy.conf.verb = 0
 
-class synfinfu:
-	def __init__(self, params):
-		if len(params) != 2:
-			self.usage()
-			exit(1)
-		self.ip = params[0]
-		self.port = int(params[1])
-
-	def usage(self):
-		print "Usage:"
-		print "\t%s tcp.synfinfu <ip> <port>" % sys.argv[0]
+class synfinfu(IPFU):
+	"""synfinfu
+	ipfu synfinfu <ip> <port>
+	"""
+	def __init__(self, params=None):
+		try:
+			self.ip = params[0]
+			self.port = int(params[1])
+		except:
+			print self.__doc__
+			if params is not None: exit(1)
 
 	def start(self):
 		self.synfinfu(self.ip, self.port)

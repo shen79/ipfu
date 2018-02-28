@@ -1,15 +1,9 @@
 #!/usr/bin/python
 
-import logging, time, os, sys, inspect, socket, nfqueue, ipcalc, struct
-import importlib, scandir
+import importlib, scandir, os, sys
 scriptroot = os.path.dirname(os.path.realpath(__file__))
 sys.path.append(scriptroot + "/mods")
 sys.path.append(scriptroot + "/libs")
-logging.getLogger("scapy.runtime").setLevel(logging.ERROR)	# prevent scapy warnings for ipv6
-from scapy import all as scapy
-from netaddr import IPAddress
-
-scapy.conf.verb = 0
 
 
 if __name__ == "__main__":

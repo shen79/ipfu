@@ -1,8 +1,7 @@
 #!/usr/bin/python
 
 import logging, time, os, sys, inspect, socket, nfqueue, ipcalc, struct
-sys.path.append("./libs")
-from mixins import *
+from IPFU import *
 
 logging.getLogger("scapy.runtime").setLevel(logging.ERROR)	# prevent scapy warnings for ipv6
 from scapy import all as scapy
@@ -10,19 +9,19 @@ from netaddr import IPAddress
 scapy.conf.verb = 0
 
 # udpholepunch
-class udpholepunch(loggerMixin):
-	def __init__(self, params):
-		if len(params) != 4:
-			self.usage()
-			exit(1)
-		self.proto = params[0]
-		self.server_ip = params[1]
-		self.client_ip = params[2]
-		self.domain = params[3]
-
-	def usage(self):
-		print "Usage:"
-		print "\t%s udpholepunch <proto:dns|53|snmp|161|time|123|?> <serverip> <clientip> <domain>" % sys.argv[0]
+class udpholepunch(IPFU):
+	"""udpholepunch - holepunching for UDP
+	ipfu udpholepunch <proto:dns|53|snmp|161|time|123|?> <serverip> <clientip> <domain>
+	"""
+	def __init__(self, params=None):
+		try:
+			self.proto = params[0]
+			self.server_ip = params[1]
+			self.client_ip = params[2]
+			self.domain = params[3]
+		except:
+			print self.__doc__
+			if params is not None: exit(1)
 
 	def start(self):
 		self.dnspunch(self.server_ip, self.client_ip, self.domain)
