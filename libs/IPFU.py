@@ -2,15 +2,17 @@
 
 import logging, time, os, sys, inspect, socket, nfqueue, ipcalc, struct
 import importlib, scandir
+from netaddr import IPAddress
+import netifaces
 sys.path.append("./mods")
 logging.getLogger("scapy.runtime").setLevel(logging.ERROR)	# prevent scapy warnings for ipv6
 from scapy import all as scapy
-from netaddr import IPAddress
+#from netaddr import IPAddress
 
 scapy.conf.verb = 0
 
 # Our helper logger class
-class loggerMixin:
+class IPFU:
 	def __pfu_out(self, msg, msgcolor):
 		color = {  "mod": '\033[90m', "msg": '\033[94m',
 				"err": '\033[91m', "end": '\033[0m' }
@@ -24,16 +26,17 @@ class loggerMixin:
 	def err(self, msg):
 		self.__pfu_out(msg, "err")
 
-# global logger instance
-#log = logger()
+	def getMyIP(self, iface):
+		return netifaces.ifaddresses(iface)[netifaces.AF_INET][0]['addr']
 
-# getmacs mixin
-class GetMacsMixin(loggerMixin):
+	def getMyNet(self, iface):
+		return self.getMyIP(iface) + '/' + str(IPAddress(netifaces.ifaddresses(iface)[netifaces.AF_INET][0]['netmask']).netmask_bits())
+
 	def getmacs(self, target):
 		ret = {'ip_mac': {}, 'mac_ip': {}}
 		self.msg('arping in progress')
 		ans,unans = scapy.arping(target)
-		self.msg('finished')
+		self.msg('arping finished')
 		for a in ans:
 #			a[1].show()
 			mac = a[1][scapy.ARP].hwsrc

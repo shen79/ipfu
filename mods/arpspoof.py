@@ -1,7 +1,6 @@
 #!/usr/bin/python
 
 import logging, time, os, sys, inspect, socket, nfqueue, ipcalc, struct
-sys.path.append("./libs")
 from mixins import *
 logging.getLogger("scapy.runtime").setLevel(logging.ERROR)	# prevent scapy warnings for ipv6
 from scapy import all as scapy
@@ -12,20 +11,20 @@ scapy.conf.verb = 0
 
 
 
-class arpsub(GetMacsMixin):
-	def __init__(self, params):
-		if len(params) != 3:
-			self.usage()
-			exit(1)
-		self.iface = params[0]
-		self.mynet = params[1]
-#		self.myip = params[2]
-		self.subnet = params[2]
-
-	def usage(self):
-		print "Usage: %s ether.arpsub <iface> <your-network> <your-ip> <subnet>" % sys.argv[0]
+class arpspoof(GetMacsMixin):
+	"""arpspoof - simple ARP spoof attack
+	ipfu arpspoof <iface> <your-network> <your-ip> <subnet>
+	"""
+	def __init__(self, params=None):
+		try:
+			self.iface = params[0]
+			self.subnet = params[2]
+		except:
+			print self.__doc__
+			if params is not None: exit(1)
 
 	def start(self):
+		pass
 		lt = self.getmacs(self.mynet)
 		
 		pkt = scapy.Ether(dst="ff:ff:ff:ff:ff:ff")
