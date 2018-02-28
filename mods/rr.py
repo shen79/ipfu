@@ -12,27 +12,21 @@ scapy.conf.verb = 0
 
 # rr module
 class rr(IPFU):
-	"""rr - Record Route IP options feature
-	ipfu rr [-i] <IP> <tcpport>
-		-i do ICMP RR"
+	"""rr - Record Route IP options feature using ICMP and TCP
+	ipfu rr <IP> <tcpport>
 	"""
 	def __init__(self, params=None):
 		self.do_icmp = False
 		try:
-			textparams = filter(lambda x: x != "-i", params)
-			if "-i" in params:
-				self.do_icmp=True
-	
-			self.dst = textparams[0]
-			self.dport = textparams[1]
+			self.dst = params[0]
+			self.dport = params[1]
 		except:		
 			print self.__doc__
 			if params is not None: exit(1)
 
 	def start(self):
-		if self.do_icmp == 1:
-			icmprr = self.rr_icmp(self.dst)
-			slef.msg("icmp route: %s" % icmprr)
+		icmprr = self.rr_icmp(self.dst)
+		self.msg("icmp route: %s" % icmprr)
 		tcprr = self.rr_tcp(self.dst, self.dport)
 		self.msg("tcp route: %s" % tcprr)
 

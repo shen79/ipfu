@@ -16,7 +16,7 @@ class arpspoof(IPFU):
 	"""
 	
 	def __init__(self, params=None):
-		signal.signal(signal.SIGINT, self.ctrlc)
+		signal.signal(signal.SIGINT, self.abort_attack)
 		try:
 			self.gateway = params[0]
 			self.target = params[1]
@@ -25,7 +25,7 @@ class arpspoof(IPFU):
 			print self.__doc__
 			if params is not None: exit(1)
 
-	def ctrlc(self, signal, frame):
+	def abort_attack(self, signal, frame):
 		print("aborting attack")
 		sys.exit(0)
 
