@@ -29,15 +29,15 @@ class tsfu(IPFU):
 
 	# TODO: network/broadcast addr scan, bcoz this is slow... but effective
 	def tsfu(self, prev_ip, target_ip, port, net):
-		log.msg("checking for 127.0.0.1 ...")
+		self.msg("checking for 127.0.0.1 ...")
 		ptr_, oflw_, flag_ = self.__do_tsfu(prev_ip, target_ip, port, '127.0.0.1')
 		if ptr_ is not False:
-			log.msg("Okay, it works. (ptr=%-2d overflow=%d)" % (ptr_, oflw_))
+			self.msg("Okay, it works. (ptr=%-2d overflow=%d)" % (ptr_, oflw_))
 		else:
-			log.err("shit... :/")
+			self.err("shit... :/")
 			exit(0)
 	
-		log.msg("scanning ...")
+		self.msg("scanning ...")
 		try:
 			iplist = ipcalc.Network(net)
 		except ValueError:
@@ -51,7 +51,7 @@ class tsfu(IPFU):
 					info = "is known"
 				else:
 					info = "is known by another box behind this one."
-				log.msg("%s %s (ptr=%-2d overflow=%d distance=%d)" % (test_ip, info, ptr, oflw, dist_oflw))
+				self.msg("%s %s (ptr=%-2d overflow=%d distance=%d)" % (test_ip, info, ptr, oflw, dist_oflw))
 
 	def __do_tsfu(self, prev_ip, target_ip, port, test_ip):
 		#        Opt_header________   IP1______________________    TS1_____    IP2______________________    TS2_____
@@ -90,7 +90,7 @@ class tsfu(IPFU):
 					for i in range(int(s2[0]), int(s2[1])+1):
 						sa.append(i)
 				else:
-					log.err("invalid expression: '%s'" % expr)
+					self.err("invalid expression: '%s'" % expr)
 					exit(1)
 			s.append(sa)
 #		print s

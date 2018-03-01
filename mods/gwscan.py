@@ -3,7 +3,6 @@
 import logging, time, os, sys, inspect, socket, nfqueue, ipcalc, struct
 logging.getLogger("scapy.runtime").setLevel(logging.ERROR)	# prevent scapy warnings for ipv6
 from IPFU import *
-
 from scapy import all as scapy
 from netaddr import IPAddress
 
@@ -12,7 +11,7 @@ scapy.conf.verb = 0
 
 # gwscan module
 class gwscan(IPFU):
-	"""gwscan
+	"""TODO gwscan
 	ipfu gwscan <local_subnet> <target_ip/net>
 	examples:
 		ipfu gwscan 192.168.1.0/24 8.8.8.8
