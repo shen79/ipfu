@@ -1,35 +1,57 @@
-#!/usr/bin/python
+#!/home/kzoltan/Documents/Python/Envs/scapy/bin/python
+""" IPFU main file """
 
-import importlib, scandir, os, sys
-scriptroot = os.path.dirname(os.path.realpath(__file__))
-sys.path.append(scriptroot + "/mods")
-sys.path.append(scriptroot + "/libs")
+import scandir
+import os
+import sys
+import imp
 
+# dir to store modules
+MODS_DIRNAME = "mods"
+# dir to store libs
+LIBS_DIRNAME = "libs"
+
+SCRIPTROOT = os.path.dirname(os.path.realpath(__file__))
+sys.path.append(SCRIPTROOT + "/" + LIBS_DIRNAME)
+
+def get_modules_from_dirs():
+    """ return the module names from the MODS_DIRNAME directory """
+    module_files = scandir.walk(SCRIPTROOT + "/" + MODS_DIRNAME)
+    module_names = []
+    for i in list(module_files)[0][2]:
+        if i[-3:] == ".py":
+            module_names.append(i[:-3])
+    return module_names
+
+def print_all_module_names(module_names):
+    """ prints all module names stored in module_names parameter """
+    print "Currently available modules: "
+    for module in module_names:
+        print "  " + module
+
+def import_module(selected_module):
+    """ import named module in parameter """
+    return imp.load_source(selected_module,\
+    SCRIPTROOT + "/" + MODS_DIRNAME + "/" +\
+    selected_module + ".py")
+
+def start_module(selected_module_name, imported_module):
+    """ start imported_module named in selected_module_name """
+    class_ = getattr(imported_module, selected_module_name)
+    module = class_(sys.argv[2:])
+    module.start()
 
 if __name__ == "__main__":
-	modulenames = []
-	mf = scandir.walk(scriptroot+"/mods")
-	for i in list(mf)[0][2]:
-		if i[-3:] == ".py":
-			modulenames.append( i[:-3] )
-	
-	if len(sys.argv) < 2 or sys.argv[1] not in modulenames:
-		print sys.argv[0],"<modulename>"
-		for mod in modulenames:
-			module = importlib.import_module(mod)
-			class_ = getattr(module, mod)
-			m = class_()
-	else:
-		mod = sys.argv[1]
-		module = importlib.import_module(mod)
-		class_ = getattr(module, mod)
-		m = class_(sys.argv[2:])
-		m.start()
+    # scan for all modules in modules directory
+    MODULE_NAMES = get_modules_from_dirs()
 
-
-
-
-
-
-
-
+    if len(sys.argv) < 2 or sys.argv[1] not in MODULE_NAMES:
+        # if bad parameters given, print help and
+        # the list of modules
+        print sys.argv[0], "<modulename>"
+        print_all_module_names(MODULE_NAMES)
+    else:
+        # import selected module and start it
+        SELECTED_MODULE_NAME = sys.argv[1]
+        IMPORTED_MODULE = import_module(SELECTED_MODULE_NAME)
+        start_module(SELECTED_MODULE_NAME, IMPORTED_MODULE)
