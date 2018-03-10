@@ -27,13 +27,11 @@ class tracemap(IPFU):
 
 	def start(self):
 		self.tracemap()
-	
-	def tracemap(self):
-		# punchpkt
-		self.msg("tracemapping...")
-		res = {}
+
+
+	def create_packets(self):
+		self.msg("creating packets")
 		lasthop=32
-#		ttls = range(0,lasthop+1)[::-1]
 		packets = []
 		for ttl in range(0,lasthop+1)[::-1]:
 #			self.msg("ttl = %d" % ttl)
@@ -45,8 +43,19 @@ class tracemap(IPFU):
 				self.usage()
 				sys.exit(1)
 			packets.append(pkt)
-		res = scapy.sr(packets, timeout=4, inter=0.2)
+		self.msg("finished, %d packets" % len(packets))
+		return packets
+
 	
+	def tracemap(self):
+		# punchpkt
+		self.msg("tracemapping...")
+		res = {}
+#		ttls = range(0,lasthop+1)[::-1]
+		packets = self.create_packets()
+		self.msg("sending and recving..")
+		res = scapy.sr(packets, timeout=4, inter=0.2)
+		self.msg("finished")
 #		print res
 	
 		trace = {}
