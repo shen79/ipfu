@@ -35,7 +35,10 @@ class rr(IPFU):
 		pkt /= scapy.ICMP()
 		intr_icmp = scapy.sr1(pkt, timeout=2)
 		if intr_icmp is not '':
-			return intr_icmp.options[0].routers
+			try:
+				return intr_icmp.options[0].routers
+			except:
+				return None
 
 	def rr_tcp(self, dst, dport):
 		pkt = scapy.IP(dst=dst, proto=6, options=scapy.IPOption('\x01\x07\x27\x04' + '\x00'*36))
