@@ -70,3 +70,49 @@ class IPFU(object):
         # {'ip_mac': {'192.168.110.1': 'e4:8d:8c:a0:e8:a9'},
         #  'mac_ip': {'e4:8d:8c:a0:e8:a9': ['192.168.110.1']}}
         return address_table
+
+	def get_ips_for_iface(self, iface):
+		pass
+	def get_ips_for_ifaces(self):
+		pass
+	def get_gw_for_ip(self, ip):
+		# RET mac, ip
+		pass
+	def get_default_gw(self):
+		# RET mac, ip
+		pass
+	
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

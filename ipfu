@@ -1,4 +1,4 @@
-#!/home/kzoltan/Documents/Python/Envs/scapy/bin/python
+#!/usr/bin/python
 """ IPFU main file """
 
 import scandir
