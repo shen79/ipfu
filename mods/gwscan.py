@@ -33,6 +33,8 @@ class gwscan(IPFU):
 	def gwscan_icmp(self, net, ip):
 		self.msg('gwscan for net %s, searching gw for %s' %(net, ip))
 		lt = self.getmacs(net)
+#		from pprint import pprint as pp
+#		pp(lt)
 		#ans,unans = scapy.srp(scapy.Ether(dst='ff:ff:ff:ff:ff:ff') / scapy.IP(dst=ip) / scapy.ICMP(), timeout=5)
 		pkt = scapy.Ether(dst=lt['mac_ip'].keys())
 		pkt/= scapy.IP(dst=ip)
@@ -44,12 +46,17 @@ class gwscan(IPFU):
 				if a[scapy.ICMP].type == 0 and a[scapy.ICMP].code == 0:
 					mac = a[scapy.Ether].src
 					r_ip = a[scapy.IP].src
-					ip = lt['mac_ip'][mac]
+					if mac in lt['mac_ip']:
+						ip = lt['mac_ip'][mac]
+					else:
+						ip = '_UNKNOWN'
+						a.show()
 					ret.append({
 						'ttype':	'ping',
 						'gw_mac':	mac,
 						'gw_ip':	ip,
 						'r_ip':		r_ip
 					})
+						
 		self.msg('gwscan finished')
 		return ret
